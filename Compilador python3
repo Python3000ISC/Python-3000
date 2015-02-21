@@ -1,0 +1,258 @@
+#include<stdio.h>
+#include<String.h>
+#include <stdlib.h>
+
+typedef struct {
+  char carc[50];
+  int token;
+  }Asig_Tok;
+  Asig_Tok atoken[]={
+  	//faltan tokens
+  	{"False", 20},
+	{"class", 21}, 
+	{"finally", 22}, 
+	{"is", 23}, 
+	{"return", 24}, 
+	{"None", 25}, 
+	{"continue", 26}, 
+	{"for", 27}, 
+	{"lambda", 28}, 
+	{"try", 29}, 
+	{"True", 30}, 
+	{"def", 31}, 
+	{"from", 32}, 
+	{"nonlocal", 33}, 
+	{"while", 34}, 
+	{"and", 35}, 
+	{"del", 36}, 
+	{"global", 37}, 
+	{"not", 38}, 
+	{"with", 39}, 
+	{"as", 40}, 
+	{"assert", 41}, 
+	{"else", 42}, 
+	{"elif", 43}, 
+	{"if", 44}, 
+	{"or", 45}, 
+	{"yield", 46}, 
+	{"import", 47}, 
+	{"pass", 48}, 
+	{"break", 49}, 
+	{"except", 50}, 
+	{"in", 51}, 
+	{"raise", 52}, 
+	
+};
+
+void imprimirTokens(){
+	int i;
+	for(i=0;i < 129;i++){
+		printf("{%s, %d}\n",atoken[i].carc, atoken[i].token);
+	}
+}
+
+//________________________________________________________________________________________//
+struct milista
+{
+	int renglon;
+	char dato[100];
+	struct milista *sig;
+};
+
+typedef struct milista nodo;
+typedef nodo *tipo;
+
+void imprimirlista(tipo p){
+	while(p != NULL){
+		printf("[%s, %d]\n", p->dato, p->renglon);
+		p=p->sig;
+	}
+}
+
+void insertarlista(tipo *lista, int x, char pala[100]){
+	tipo n, p=*lista;
+	n=(nodo *)malloc(sizeof(nodo));
+	n->renglon = x+1;
+	strcpy(n->dato, pala);
+	n->sig = NULL;
+	
+	if(*lista == NULL)
+		*lista = n;
+	else
+		{
+			while(p->sig != NULL)
+				p=p->sig;
+				
+				p->sig = n;
+				
+		}	
+	
+}
+
+
+void guardarlista(tipo *lista, FILE *Archivo, char res[118][20]){
+	tipo n, p=*lista;
+	n=(nodo *)malloc(sizeof(nodo));
+	n->sig = NULL;
+	strcpy(n->dato, "");
+	n->renglon = 0;
+	char pala[100], a[100], z;
+	int x,y, i=0;
+	bool ex=true;
+printf("Archivo original: \n");	
+	while(!feof(Archivo)){
+		fputc(fgetc(Archivo), stdout);
+	}
+printf("\n\nSeparado en: \n");
+rewind(Archivo);	
+	x = fgetc(Archivo);
+	if(lista){
+		while(!feof(Archivo))
+		{ 
+		back:
+		//espacio
+		if(x == 32){
+			if(strlen(pala) > 1)
+			insertarlista(&*lista, i, pala);
+			x = fgetc(Archivo);
+			pala[0] = 0;
+			goto back;
+		}	
+				
+		//Salto de linea
+		if(x == 10){
+			if(strlen(pala) > 1)
+			insertarlista(&*lista, i, pala);
+			i = i + 1;
+			x = fgetc(Archivo);
+			pala[0] = 0;
+			goto back;
+		}			
+		//Tabulacion
+		if(x == 9){
+			if(strlen(pala) > 1)
+			insertarlista(&*lista, i, pala);
+			x = fgetc(Archivo);
+			pala[0] = 0;
+			goto back;
+		}		
+		
+		//Numeros
+		if(x >= 48 && x <= 57){
+			if(strlen(pala) > 1)
+			insertarlista(&*lista, i, pala);
+			
+			pala[0] = 0;
+				z = x;
+				a[0] = z;
+				a[1] = 0;
+				strcat(pala, a);
+			x = fgetc(Archivo);
+			while(x >= 48 && x <= 57){
+				z = x;
+				a[0] = z;
+				a[1] = 0;
+				strcat(pala, a);
+				x = fgetc(Archivo);	
+			}
+			
+			insertarlista(&*lista, i, pala);
+			pala[0] = 0;
+			goto back;
+		}		
+		//Comillas
+		if(x == 34){
+			pala[0] = 34;
+			insertarlista(&*lista, i, pala);
+			pala[0] = 0;
+			x = fgetc(Archivo);
+			while(x != 34){
+				z = x;
+				a[0] = z;
+				a[1] = 0;
+				strcat(pala, a);
+				x = fgetc(Archivo);
+			}
+			insertarlista(&*lista, i, pala);
+			pala[0] = 0;
+			z = x;
+			a[0] = z;
+			a[1] = 0;
+			strcat(pala, a);
+			insertarlista(&*lista, i, pala);
+			x = fgetc(Archivo);
+			pala[0] = 0;
+			goto back;
+		}
+		
+		
+		//Variable
+		if(x == 36){
+			z = x;
+			a[0] = z;
+			a[1] = 0;
+			strcat(pala, a);
+			y = 0;
+			insertarlista(&*lista, i, pala);
+			pala[0] = 0;
+			x = fgetc(Archivo);
+			z = x;
+			a[0] = z;
+			a[1] = 0;
+			while(x != 9 && x != 32 && x != 61 && x != 45 && x != 43 && x != 47 && x != 34 && x != 59  && x != 58  && x != 123  && x != 125  && x != 91  && x != 94  && x != 40){
+				z = x;
+				a[0] = z;
+				a[1] = 0;
+				strcat(pala, a);
+				x = fgetc(Archivo);
+			}	
+			insertarlista(&*lista, i, pala);
+			pala[0] = 0;
+			goto back;
+		}
+				
+		if(x != 10 && x != 32 && x != 34 && x != 36 && x != 9 ){	
+			z = x;
+			a[0] = z;
+			a[1] = 0;
+			strcat(pala, a);
+			y = 0;
+		while(y < 27){
+				if(strcmp(pala, res[y]) == 0){
+					insertarlista(&*lista, i, pala);
+					pala[0] = 0;
+					goto next;
+				}
+
+			y = y + 1;
+			
+		}
+
+		next:
+		x = fgetc(Archivo);
+		
+		}	
+
+   		}
+	}
+}
+	
+
+
+main(){
+	
+	tipo lista=NULL;
+	FILE *Archivo, *Reservadas;
+	char res[36][20] = {"?", "^", "'", "=", ">", "<", "(", ")",";", ":", ",", "[", "]", "{", "}", "+", "-", "*", "/", "!", "||", "&&", "!=", "==", ">=", "<=", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0"};
+	int i=0;
+	
+	printf("\n\n\n TOKENS\n__________________________\n");
+    imprimirTokens();
+	Archivo = fopen("anum.py", "r");
+	guardarlista(&lista, Archivo, res);
+	
+    printf("\n\n__________________________\n");
+	imprimirlista(lista);
+	
+
+}
